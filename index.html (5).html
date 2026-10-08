@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>New Nation Interactive Simulation</title>
+<style>
+:root{
+ --navy:#182a49;--blue:#2d5f8b;--red:#9b4038;--gold:#c7962d;--cream:#fbf6e9;
+ --ink:#20252b;--muted:#66717b;--green:#3e7354;--line:#ded6c6;
+}
+*{box-sizing:border-box}
+body{margin:0;background:linear-gradient(#edf2f6,#fffaf0 35%);font-family:Arial,Helvetica,sans-serif;color:var(--ink);line-height:1.55}
+header{background:linear-gradient(135deg,#172846,#294e73 58%,#7e3733);color:white;text-align:center;padding:35px 18px}
+header h1{font-size:clamp(2rem,5vw,3.5rem);margin:0 0 8px}
+header p{max-width:900px;margin:auto;font-size:1.08rem}
+nav{position:sticky;top:0;z-index:10;background:#fffdf8;border-bottom:1px solid var(--line);display:flex;gap:7px;overflow-x:auto;padding:9px}
+nav button{white-space:nowrap;border:1px solid #d3c7b2;background:#f5efe1;border-radius:999px;padding:10px 14px;font-weight:700;cursor:pointer}
+nav button.active{background:var(--navy);color:#fff}
+main{max-width:1100px;margin:auto;padding:18px}
+.card{background:white;border:1px solid var(--line);border-radius:18px;padding:23px;margin:18px 0;box-shadow:0 4px 16px rgba(30,40,50,.07)}
+.screen{display:none}.screen.active{display:block}
+h2{color:var(--navy);margin-top:3px}h3{color:var(--blue)}
+.kicker{text-transform:uppercase;letter-spacing:.12em;font-size:.8rem;font-weight:800;color:#8b5b25}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+.panel{background:#f9f4e8;border:1px solid #e4d7bb;border-radius:14px;padding:15px}
+.note{background:#edf6fb;border-left:5px solid var(--blue);padding:12px 15px;border-radius:8px}
+.warning{background:#fff0ed;border-left:5px solid var(--red);padding:12px 15px;border-radius:8px}
+.choice{display:grid;gap:10px}
+.choice button,.next,.restart{border:0;border-radius:12px;padding:13px 15px;font-weight:700;cursor:pointer}
+.choice button{background:#f0eadf;text-align:left}
+.choice button.correct{background:#d9eedc;border:2px solid #4c8a58}
+.choice button.wrong{background:#f4d6d1;border:2px solid var(--red)}
+.choice button:disabled{cursor:default}
+.next{background:var(--green);color:#fff;margin-top:15px}
+.restart{background:var(--navy);color:#fff;margin-top:15px}
+.feedback{margin-top:12px;background:#f7f3ea;border-radius:10px;padding:11px;min-height:24px}
+.statbar{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0}
+.stat{background:#f1e2bd;border-radius:12px;padding:8px 12px;font-weight:800}
+.progress{height:9px;background:#d9d6ce;border-radius:20px;overflow:hidden}
+.progress div{height:100%;width:0;background:var(--gold);transition:.25s}
+.timeline{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.timeline div{background:#faf5e8;border-left:5px solid var(--gold);padding:13px;border-radius:8px}
+.balance{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.compare{border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.compare h3{margin:0;background:#eee6d7;padding:12px}.compare div{padding:12px}
+.svgbox{background:#edf3f7;border-radius:14px;padding:8px;border:1px solid #d6e0e6}
+table{width:100%;border-collapse:collapse;margin:12px 0}th,td{border:1px solid #d8d2c5;padding:9px;text-align:left}th{background:#eee7d8}
+footer{color:var(--muted);font-size:.9rem;padding:20px 0 45px}
+@media(max-width:650px){.timeline,.balance{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+<h1>🇺🇸 The New Nation: An Interactive Simulation</h1>
+<p>1789–1804 • Become an advisor, make decisions, test constitutional ideas, and experience the presidencies of Washington, Adams, and Jefferson.</p>
+</header>
+
+<nav id="nav"></nav>
+<main>
+<div class="statbar">
+ <div class="stat">Civic Knowledge: <span id="score">0</span></div>
+ <div class="stat">Stage: <span id="stage">Mission Briefing</span></div>
+</div>
+<div class="progress"><div id="progress"></div></div>
+
+<section class="screen active" data-title="Mission">
+<div class="card">
+<div class="kicker">Mission briefing</div>
+<h2>You are an advisor to the new republic</h2>
+<p>The Constitution has created a new federal government. Your job is to help the nation navigate its first years while understanding the disagreements that shaped American politics.</p>
+<div class="grid">
+<div class="panel"><h3>Washington</h3><p>Builds precedents for the presidency, manages debt, faces the Whiskey Rebellion, and warns the nation in his Farewell Address.</p></div>
+<div class="panel"><h3>Adams</h3><p>Faces conflict with France, the Alien and Sedition Acts, and the bitter election of 1800.</p></div>
+<div class="panel"><h3>Jefferson</h3><p>Emphasizes limited government while making major decisions including the Louisiana Purchase.</p></div>
+</div>
+<div class="note"><strong>Your goal:</strong> Connect events to larger debates about federal power, state power, the economy, foreign policy, and constitutional interpretation.</div>
+<button class="next" data-next>Begin the Simulation →</button>
+</div>
+</section>
+
+<section class="screen" data-title="Washington">
+<div class="card">
+<div class="kicker">Stage 1 • George Washington's Presidency</div>
+<h2>🏛️ Setting presidential precedents</h2>
+<p>George Washington became the first U.S. president in 1789. Because the office was new, his actions helped establish traditions that later presidents could follow or change.</p>
+<div class="grid">
+<div class="panel"><h3>Cabinet precedent</h3><p>Washington relied on department heads such as Thomas Jefferson and Alexander Hamilton for advice. The Constitution does not use the word “cabinet,” but Washington's practice helped establish the presidential cabinet.</p></div>
+<div class="panel"><h3>Two-term tradition</h3><p>Washington voluntarily left office after two terms. This created a powerful precedent that lasted until Franklin D. Roosevelt was elected to four terms; the 22nd Amendment later limited presidents to two elected terms.</p></div>
+<div class="panel"><h3>Peaceful transfer</h3><p>Washington's retirement demonstrated that political power could be transferred without a president holding office permanently.</p></div>
+</div>
+<h3>Advisor decision</h3>
+<div class="choice" data-key="washington">
+<button data-correct="true">Create traditions that show the president can seek advice, exercise constitutional authority, and voluntarily leave office.</button>
+<button>Make the presidency hereditary so future presidents automatically remain in power.</button>
+<button>Eliminate presidential advisors because the Constitution never uses the word cabinet.</button>
+</div>
+<div class="feedback"></div>
+<button class="next" data-next>Continue →</button>
+</div>
+</section>
+
+<section class="screen" data-title="Debt">
+<div class="card">
+<div class="kicker">Stage 2 • National Debt & Hamilton</div>
+<h2>💰 The new nation has debt</h2>
+<p>The United States inherited significant Revolutionary War debt. Treasury Secretary <strong>Alexander Hamilton</strong> proposed a financial program that included federal assumption of state debts, federal funding of the debt, tariffs, and an excise tax on distilled spirits.</p>
+<div class="balance">
+<div class="compare"><h3>Federalist approach</h3><div>Support a stronger national government, federal management of public credit, a national bank, manufacturing, commerce, and financial policies that could strengthen the federal government.</div></div>
+<div class="compare"><h3>Jeffersonian/Anti-Federalist tradition</h3><div>Favor a more limited federal government, stronger state authority, an agricultural republic, and suspicion of concentrated financial power.</div></div>
+</div>
+<h3>Policy choice</h3>
+<div class="choice" data-key="debt">
+<button data-correct="true">Use federal authority to establish national financial stability while debating how much power the federal government should have.</button>
+<button>Ignore the debt because national credit does not matter.</button>
+<button>Immediately eliminate all federal taxes and government revenue.</button>
+</div>
+<div class="feedback"></div>
+<div class="note"><strong>Key debate:</strong> Federalists and their opponents disagreed over national debt, taxation, the national bank, and the appropriate size and power of the federal government.</div>
+<button class="next" data-next>Continue →</button>
+</div>
+</section>
+
+<section class="screen" data-title="Whiskey">
+<div class="card">
+<div class="kicker">Stage 3 • Whiskey Rebellion</div>
+<h2>🥃 Can the new government enforce its laws?</h2>
+<p>In 1791 Congress imposed an excise tax on distilled spirits. Farmers in western Pennsylvania and elsewhere strongly resisted the tax. The conflict became known as the <strong>Whiskey Rebellion</strong>.</p>
+<p>In 1794 Washington called militia forces from several states and personally traveled toward Pennsylvania. The rebellion collapsed without a major battle.</p>
+<div class="note"><strong>Why it mattered:</strong> The federal government demonstrated that it had the power to enforce a law passed by Congress. Washington's response also demonstrated the power of the executive branch to use federal authority to uphold federal law.</div>
+<h3>Constitutional choice</h3>
+<div class="choice" data-key="whiskey">
+<button data-correct="true">Enforce the federal law while showing that the new government could maintain order and uphold congressional authority.</button>
+<button>Allow each state to decide whether federal laws apply within its borders.</button>
+<button>Let private citizens enforce federal taxes themselves.</button>
+</div>
+<div class="feedback"></div>
+<button class="next" data-next>Continue →</button>
+</div>
+</section>
+
+<section class="screen" data-title="Isolation">
+<div class="card">
+<div class="kicker">Stage 4 • Foreign Policy</div>
+<h2>🌎 Washington and avoiding permanent alliances</h2>
+<p>Europe was at war during Washington's presidency. Americans were divided over whether the United States should support revolutionary France, Britain, or remain neutral.</p>
+<p>Washington's administration issued the <strong>Proclamation of Neutrality in 1793</strong>. In his <strong>Farewell Address (1796)</strong>, Washington warned against permanent alliances and urged Americans to avoid unnecessary political attachments to foreign powers.</p>
+<div class="grid">
+<div class="panel"><h3>Why neutrality?</h3><p>The young United States was militarily and economically vulnerable. Washington believed the country should have room to grow rather than become trapped in European wars.</p></div>
+<div class="panel"><h3>France vs. Britain</h3><p>Some Americans supported revolutionary France because France had helped the United States during the Revolution. Others favored Britain because of trade and economic connections.</p></div>
+</div>
+<h3>Decision</h3>
+<div class="choice" data-key="isolation">
+<button data-correct="true">Remain neutral and avoid permanent political alliances while maintaining necessary trade and diplomacy.</button>
+<button>Immediately enter every European war to prove American strength.</button>
+<button>End all foreign trade and communication permanently.</button>
+</div>
+<div class="feedback"></div>
+<h3>Farewell Address connection</h3>
+<p>Washington's Farewell Address discussed dangers of permanent alliances and partisan divisions. It was advice rather than a constitutional amendment or law.</p>
+<button class="next" data-next>Continue →</button>
+</div>
+</section>
+
+<section class="screen" data-title="Adams">
+<div class="card">
+<div class="kicker">Stage 5 • John Adams</div>
+<h2>🦅 The Adams presidency</h2>
+<p><strong>John Adams</strong> became the second president in 1797. His presidency was dominated by foreign tensions with France, domestic political conflict, and disagreements within the Federalist Party.</p>
+<div class="panel"><h3>The XYZ Affair</h3><p>French officials demanded concessions from American diplomats. When the American government reported the incident using the letters X, Y, and Z, public anger toward France increased.</p></div>
+<p>Adams ultimately avoided a full-scale war with France through diplomacy, even though many Federalists wanted a tougher response.</p>
+<h3>Political consequence</h3>
+<div class="choice" data-key="adams">
+<button data-correct="true">Adams's decisions could divide Federalists because some wanted stronger confrontation with France while Adams pursued diplomacy.</button>
+<button>Adams's presidency eliminated all political parties.</button>
+<button>Adams had no foreign-policy disputes during his presidency.</button>
+</div>
+<div class="feedback"></div>
+<button class="next" data-next>Continue →</button>
+</div>
+</section>
+
+<section class="screen" data-title="Alien">
+<div class="card">
+<div class="kicker">Stage 6 • Alien & Sedition Acts</div>
+<h2>📰 The Alien and Sedition Acts</h2>
+<p>In 1798, the Federalist-controlled Congress passed several laws known collectively as the <strong>Alien and Sedition Acts</strong>. They increased federal power over immigrants and restricted certain forms of speech critical of the government.</p>
+<table>
+<tr><th>Act</th><th>Basic effect</th></tr>
+<tr><td>Naturalization Act</td><td>Lengthened the residency requirement for citizenship.</td></tr>
+<tr><td>Alien Acts</td><td>Expanded presidential authority involving certain noncitizens.</td></tr>
+<tr><td>Sedition Act</td><td>Criminalized certain false or malicious writings and speech against the federal government.</td></tr>
+</table>
+<div class="warning"><strong>Political effect:</strong> Democratic-Republicans argued the laws threatened free speech and federal power was being abused. Federalists defended them as measures connected to national security and political stability. The controversy hurt the Federalists politically and became an important issue in the election of 1800.</div>
+<h3>Historical thinking</h3>
+<div class="choice" data-key="alien">
+<button data-correct="true">The Acts became a major political issue because opponents argued they violated liberties and helped demonstrate the dangers of excessive federal power.</button>
+<button>The Acts were universally supported by Americans.</button>
+<button>The Acts had nothing to do with the election of 1800.</button>
+</div>
+<div class="feedback"></div>
+<button class="next" data-next>Continue →</button>
+</div>
+</section>
+
+<section class="screen" data-title="1800">
+<div class="card">
+<div class="kicker">Stage 7 • Election of 1800</div>
+<h2>🗳️ The election that exposed a constitutional problem</h2>
+<p>The election of 1800 was intensely contested. <strong>Thomas Jefferson</strong> and <strong>Aaron Burr</strong>, running on the same Democratic-Republican ticket, each received the same number of electoral votes.</p>
+<p>Under the Constitution as it then operated, the election went to the <strong>House of Representatives</strong>. The House voted repeatedly before Jefferson finally won the presidency, with Burr becoming vice president under the system then in place.</p>
+<div class="note"><strong>Why this mattered:</strong> The election revealed a flaw in the original Electoral College system. The <strong>12th Amendment</strong>, ratified in 1804, required electors to cast separate votes for president and vice president.</div>
+<h3>Decision</h3>
+<div class="choice" data-key="1800">
+<button data-correct="true">Use the constitutional process: the House decides a tied presidential election, then amend the system to reduce the chance of the same problem recurring.</button>
+<button>Ignore the Constitution and let the military select the president.</button>
+<button>Cancel the election and allow the incumbent to stay indefinitely.</button>
+</div>
+<div class="feedback"></div>
+<button class="next" data-next>Continue →</button>
+</div>
+</section>
+
+<section class="screen" data-title="Jefferson">
+<div class="card">
+<div class="kicker">Stage 8 • Thomas Jefferson</div>
+<h2>🌾 Jefferson's vision of government</h2>
+<p>Jefferson and his Democratic-Republican allies generally favored a more limited federal government, lower taxes, agricultural interests, and stronger state authority. Jefferson also believed the Constitution should be interpreted more strictly than Federalists such as Hamilton generally preferred.</p>
+<div class="balance">
+<div class="compare"><h3>Federalist tendencies</h3><div>Stronger national government • commerce and manufacturing • national financial institutions • broader interpretation of federal powers • closer economic ties with Britain.</div></div>
+<div class="compare"><h3>Jeffersonian tendencies</h3><div>Limited federal government • agriculture • stronger state role • strict interpretation • concern about concentrated financial and political power • sympathy for revolutionary France.</div></div>
+</div>
+<h3>Which statement best captures the debate?</h3>
+<div class="choice" data-key="ideology">
+<button data-correct="true">The parties disagreed over federal versus state power, strict versus broad constitutional interpretation, economic priorities, and relations with Britain and France.</button>
+<button>Federalists and Democratic-Republicans agreed on all major constitutional questions.</button>
+<button>The disagreement was only about the names of the parties.</button>
+</div>
+<div class="feedback"></div>
+<button class="next" data-next>Continue →</button>
+</div>
+</section>
+
+<section class="screen" data-title="Louisiana">
+<div class="card">
+<div class="kicker">Stage 9 • Louisiana Purchase</div>
+<h2>🗺️ Jefferson faces a constitutional dilemma</h2>
+<p>In 1803, the United States agreed to purchase the <strong>Louisiana Territory from France for $15 million</strong>. The purchase roughly doubled the territory of the United States.</p>
+<div class="grid">
+<div class="panel"><h3>Why did Napoleon sell?</h3><p>Napoleon Bonaparte needed money and resources for his European ambitions. France had also suffered the loss of Saint-Domingue (Haiti) after the Haitian Revolution, weakening French plans for a major American empire. The renewed war with Britain also made maintaining a large North American territory less attractive.</p></div>
+<div class="panel"><h3>Why did Jefferson want it?</h3><p>Control of the Mississippi River and New Orleans was strategically important. Jefferson also saw western land as important to an agricultural republic.</p></div>
+<div class="panel"><h3>The constitutional problem</h3><p>Jefferson generally favored strict interpretation, yet the Constitution did not explicitly state that the president could purchase a huge foreign territory. Jefferson therefore faced a tension between his constitutional philosophy and his policy choice.</p></div>
+</div>
+<h3>Jefferson's choice</h3>
+<div class="choice" data-key="louisiana">
+<button data-correct="true">Purchase the territory because of its enormous strategic and agricultural importance, even while recognizing that the action raised a strict-interpretation constitutional question.</button>
+<button>Refuse the purchase because the Constitution explicitly forbids territorial acquisitions.</button>
+<button>Ask Napoleon to give the territory to the United States for free.</button>
+</div>
+<div class="feedback"></div>
+<div class="note"><strong>Historical debate:</strong> Jefferson privately considered whether a constitutional amendment might be needed, but ultimately proceeded with the purchase through a treaty and related legislation.</div>
+<button class="next" data-next>Continue →</button>
+</div>
+</section>
+
+<section class="screen" data-title="Exploration">
+<div class="card">
+<div class="kicker">Stage 10 • Lewis, Clark & Sacagawea</div>
+<h2>🧭 Explore the new territory</h2>
+<p>Jefferson sent <strong>Meriwether Lewis and William Clark</strong> to explore the newly acquired territory, map routes, study geography and natural resources, and establish relationships with Native peoples.</p>
+<p><strong>Sacagawea</strong>, a Lemhi Shoshone woman traveling with the expedition, served as an interpreter and cultural intermediary. Her presence helped the expedition communicate and travel through unfamiliar regions. Her husband, Toussaint Charbonneau, also traveled with the expedition.</p>
+<div class="panel">
+<h3>The expedition's job</h3>
+<ul>
+<li>Map rivers and geography.</li>
+<li>Record plants, animals, and natural resources.</li>
+<li>Look for routes, including a practical water route to the Pacific.</li>
+<li>Establish diplomatic relationships with Native nations.</li>
+<li>Gather information about the new territory.</li>
+</ul>
+</div>
+<h3>Expedition decision</h3>
+<div class="choice" data-key="explore">
+<button data-correct="true">Map the land, document geography and resources, and build relationships with Native nations.</button>
+<button>Travel without maps because geography does not matter.</button>
+<button>Ignore Native nations because the expedition had no need to communicate.</button>
+</div>
+<div class="feedback"></div>
+<button class="next" data-next>Continue →</button>
+</div>
+</section>
+
+<section class="screen" data-title="Barbary">
+<div class="card">
+<div class="kicker">Stage 11 • Barbary Pirates</div>
+<h2>⚓ Jefferson and the Barbary States</h2>
+<p>North African states along the Barbary Coast had demanded payments, often called <strong>tribute</strong>, from foreign governments in exchange for protection of merchant shipping. American merchant ships became involved in these conflicts after independence.</p>
+<p>Jefferson initially tried diplomacy, but during the <strong>First Barbary War (1801–1805)</strong>, the United States used naval forces and Marines against Tripoli after Tripoli declared war on the United States.</p>
+<div class="note"><strong>Why this mattered:</strong> Jefferson's administration demonstrated that even a president who favored limited government could use federal military power when he believed American commerce and national interests required it.</div>
+<h3>Decision</h3>
+<div class="choice" data-key="barbary">
+<button data-correct="true">Use diplomacy when possible while using military force when necessary to protect American shipping and national interests.</button>
+<button>Abandon all American ships in the Mediterranean.</button>
+<button>Declare war on every North African government simultaneously.</button>
+</div>
+<div class="feedback"></div>
+<button class="next" data-next>Continue →</button>
+</div>
+</section>
+
+<section class="screen" data-title="Judges">
+<div class="card">
+<div class="kicker">Stage 12 • Midnight Judges</div>
+<h2>⚖️ The last days of the Adams presidency</h2>
+<p>After the election of 1800, President Adams and the Federalist-controlled Congress passed the <strong>Judiciary Act of 1801</strong>, creating new federal judicial positions. Adams filled many of these positions near the end of his presidency.</p>
+<p>Because these appointments occurred late in Adams's term, Jefferson's supporters called some of the appointees the <strong>“midnight judges.”</strong></p>
+<div class="warning"><strong>Political conflict:</strong> Jefferson's supporters saw the appointments as an attempt by Federalists to retain influence in the judiciary. The incoming administration sought to prevent some commissions from being delivered.</div>
+<h3>Why did this become a constitutional issue?</h3>
+<div class="choice" data-key="judges">
+<button data-correct="true">It raised questions about presidential appointments, judicial power, and whether the Supreme Court could review government actions.</button>
+<button>It had nothing to do with the judiciary.</button>
+<button>It automatically made every Federalist a Supreme Court justice.</button>
+</div>
+<div class="feedback"></div>
+<button class="next" data-next>Continue →</button>
+</div>
+</section>
+
+<section class="screen" data-title="Marbury">
+<div class="card">
+<div class="kicker">Stage 13 • Marbury v. Madison</div>
+<h2>⚖️ Marbury v. Madison (1803)</h2>
+<p><strong>William Marbury</strong> was one of Adams's judicial appointees whose commission was not delivered. He asked the Supreme Court to order Secretary of State James Madison to deliver it.</p>
+<p>Chief Justice <strong>John Marshall</strong> wrote the Court's decision. The Court concluded that part of the Judiciary Act of 1789 conflicted with the Constitution because it attempted to give the Supreme Court authority beyond what Article III allowed.</p>
+<div class="note"><strong>Why it matters:</strong> Marbury v. Madison is associated with the principle of <strong>judicial review</strong>—the authority of courts to declare a law inconsistent with the Constitution.</div>
+<h3>Final constitutional question</h3>
+<div class="choice" data-key="marbury">
+<button data-correct="true">The Supreme Court can review laws and determine whether they are consistent with the Constitution.</button>
+<button>The president alone decides whether laws are constitutional.</button>
+<button>Congress can never have its laws reviewed by courts.</button>
+</div>
+<div class="feedback"></div>
+<button class="next" data-next>Continue →</button>
+</div>
+</section>
+
+<section class="screen" data-title="Final">
+<div class="card">
+<div class="kicker">Final Challenge • New Nation</div>
+<h2>🇺🇸 Build a working republic</h2>
+<p>Your final task is to explain how the major issues of the New Nation were connected.</p>
+<div class="choice" data-key="final">
+<button data-correct="true">The new nation had to balance federal and state power, debate strict versus broad constitutional interpretation, manage debt and the economy, respond to foreign conflicts, establish presidential traditions, protect political liberties, expand westward, and define the roles of Congress, the president, and the courts.</button>
+<button>The early republic had no major disagreements because everyone interpreted the Constitution the same way.</button>
+<button>Washington, Adams, and Jefferson all followed exactly the same policies.</button>
+</div>
+<div class="feedback"></div>
+<div id="results" class="panel" style="display:none"></div>
+<button class="restart" id="restart">Restart Simulation</button>
+</div>
+</section>
+
+<footer>
+<strong>Teacher note:</strong> This simulation simplifies complex events for classroom use. “Anti-Federalist” refers especially to the movement that opposed ratification of the Constitution; after ratification, many of those concerns continued among Jeffersonian Democratic-Republicans, but the groups were not identical. Political positions also varied within each party.
+<br><br>
+<strong>Major concepts:</strong> presidency • cabinet • precedents • national debt • Whiskey Rebellion • neutrality • Farewell Address • Federalists • Democratic-Republicans • Alien and Sedition Acts • election of 1800 • Louisiana Purchase • Lewis and Clark • Sacagawea • Barbary Wars • Midnight Judges • Marbury v. Madison • judicial review • strict vs. broad constitutional interpretation • federal vs. state power • agriculture vs. manufacturing/commerce • Britain vs. France.
+</footer>
+</main>
+
+<script>
+(function(){
+const screens=[...document.querySelectorAll('.screen')];
+const nav=document.getElementById('nav'),progress=document.getElementById('progress');
+const scoreEl=document.getElementById('score'),stageEl=document.getElementById('stage');
+let index=0,score=0;const answered=new Set();
+
+screens.forEach((s,i)=>{
+ const b=document.createElement('button');b.type='button';
+ b.textContent=(i+1)+'. '+s.dataset.title;
+ b.addEventListener('click',()=>show(i));nav.appendChild(b);
+});
+function show(i){
+ index=Math.max(0,Math.min(screens.length-1,i));
+ screens.forEach((s,n)=>s.classList.toggle('active',n===index));
+ [...nav.children].forEach((b,n)=>b.classList.toggle('active',n===index));
+ progress.style.width=(index/(screens.length-1)*100)+'%';
+ stageEl.textContent=screens[index].dataset.title;
+ window.scrollTo({top:0,behavior:'smooth'});
+}
+document.querySelectorAll('.choice').forEach(box=>{
+ const key=box.dataset.key;
+ box.querySelectorAll('button').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+   if(answered.has(key))return;
+   const correct=btn.dataset.correct==='true';
+   box.querySelectorAll('button').forEach(x=>x.disabled=true);
+   btn.classList.add(correct?'correct':'wrong');
+   if(!correct){const r=box.querySelector('[data-correct="true"]');if(r)r.classList.add('correct')}
+   const feedback=box.parentElement.querySelector('.feedback');
+   feedback.textContent=correct?'Correct! You connected the event to the larger New Nation issue.':'Not quite. Review the highlighted answer and the explanation above.';
+   if(correct)score++;
+   answered.add(key);scoreEl.textContent=score;
+   if(key==='final'){
+    const results=document.getElementById('results');results.style.display='block';
+    results.innerHTML='<strong>Simulation complete!</strong><br>You earned '+score+' points out of '+answered.size+'.<br><br><strong>Big idea:</strong> The New Nation was an experiment in constitutional government. Americans disagreed about federal power, economic policy, foreign relations, individual liberties, and the meaning of the Constitution.';
+   }
+  });
+ });
+});
+document.querySelectorAll('[data-next]').forEach(b=>b.addEventListener('click',()=>show(index+1)));
+document.getElementById('restart').addEventListener('click',()=>{
+ score=0;answered.clear();scoreEl.textContent='0';
+ document.querySelectorAll('.choice button').forEach(b=>{b.disabled=false;b.classList.remove('correct','wrong')});
+ document.querySelectorAll('.feedback').forEach(f=>f.textContent='');
+ document.getElementById('results').style.display='none';show(0);
+});
+show(0);
+})();
+</script>
+</body>
+</html>
